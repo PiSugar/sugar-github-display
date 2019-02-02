@@ -2,10 +2,36 @@ import spidev as SPI
 import ST7789
 import time
 
-import Image
-import ImageDraw
-import ImageFont
-import ImageColor
+from PIL import Image, ImageDraw, ImageFont, ImageColor
+import sys
+import urllib.request
+import re
+
+# BASE_URL = "https://github.com/LLK/scratch-gui"
+
+BASE_URL = sys.argv[1]
+
+req = urllib.request.Request(BASE_URL)
+html = urllib.request.urlopen(req)
+doc = html.read().decode('utf8')
+
+STAR_PATTERN = 'starred this repository">\n(.*)\n'
+WATCH_PATTERN = 'watching this repository">\n(.*)\n'
+FOLK_PATTERN = 'forked this repository">\n(.*)\n'
+NAME_PATTERN = '<title>GitHub - (.*):'
+
+star = list(set(re.findall(STAR_PATTERN, doc)))
+star = star[0].strip()
+
+watch = list(set(re.findall(WATCH_PATTERN, doc)))
+watch = watch[0].strip()
+
+folk = list(set(re.findall(FOLK_PATTERN, doc)))
+folk = folk[0].strip()
+
+name = list(set(re.findall(NAME_PATTERN, doc)))
+name = name[0].strip()
+
 
 # Raspberry Pi pin configuration:
 RST = 27
@@ -20,27 +46,21 @@ disp = ST7789.ST7789(SPI.SpiDev(bus, device),RST, DC, BL)
 # Initialize library.
 disp.Init()
 
-# Clear display.
-disp.clear()
+font = ImageFont.truetype("Verdana.ttf", 30)
+font2 = ImageFont.truetype("Verdana.ttf", 18)
 
-# Create blank image for drawing.
-image1 = Image.new("RGB", (disp.width, disp.height), "WHITE")
-draw = ImageDraw.Draw(image1)
-#font = ImageFont.truetype('/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf', 16)
-print "***draw line"
-draw.line([(60,60),(180,60)], fill = "BLUE",width = 5)
-draw.line([(180,60),(180,180)], fill = "BLUE",width = 5)
-draw.line([(180,180),(60,180)], fill = "BLUE",width = 5)
-draw.line([(60,180),(60,60)], fill = "BLUE",width = 5)
-print "***draw rectangle"
-draw.rectangle([(70,70),(170,80)],fill = "RED")
+image = Image.open('template.jpg')
+draw = ImageDraw.Draw(image)
 
-print "***draw text"
-draw.text((90, 70), 'WaveShare ', fill = "BLUE")
-draw.text((90, 120), 'Electronic ', fill = "BLUE")
-draw.text((90, 140), '1.3inch LCD ', fill = "BLUE")
-disp.ShowImage(image1,0,0)
-time.sleep(3)
 
-image = Image.open('pic.jpg')
+draw.text((70, 100), watch, fill = (0,233,255), font = font)
+draw.text((70, 145), star , fill = (0,233,255), font = font)
+draw.text((70, 190), folk , fill = (0,233,255), font = font)
+
+text_size = draw.textsize(name, font2)
+width, height = text_size
+print(name)
+draw.text(((240-width)/2, 60), name , fill = (0,233,255), font = font2)
+
+
 disp.ShowImage(image,0,0)
