@@ -2,7 +2,7 @@
 
 ## sugar-github-display
 
-可跟踪显示github项目数据的小Demo。每10秒钟会刷新一次数据。
+跟踪显示github项目数据的小Demo。每10秒钟会刷新一次数据。
 
 硬件: Raspberry Pi 0W + Waveshare 1.3inch_LCD_HAT + PiSugar 900mah。
 
